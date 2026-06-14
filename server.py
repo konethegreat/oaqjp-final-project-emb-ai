@@ -4,6 +4,7 @@ Serves the front-end page and exposes the ``/emotionDetector`` route, which runs
 the ``emotion_detector`` function on the supplied text and returns a
 human-readable summary of the detected emotions and the dominant emotion.
 """
+import requests
 from flask import Flask, render_template, request
 
 from EmotionDetection.emotion_detection import emotion_detector
@@ -16,7 +17,17 @@ def emotion_detector_route():
     """Analyze the text given via the ``textToAnalyze`` query argument."""
     text_to_analyze = request.args.get('textToAnalyze')
 
-    response = emotion_detector(text_to_analyze)
+    try:
+        response = emotion_detector(text_to_analyze)
+    except requests.exceptions.RequestException:
+        # The Watson endpoint is only reachable from inside the IBM Skills
+        # Network lab; surface a clear message instead of a raw 500 error.
+        return ("The emotion analysis service could not be reached. "
+                "It is only available from within the IBM Skills Network lab environment.")
+
+    # Blank / invalid input -> emotion_detector returns None values.
+    if response['dominant_emotion'] is None:
+        return "Invalid text! Please try again!"
 
     anger = response['anger']
     disgust = response['disgust']
