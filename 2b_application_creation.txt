@@ -1,0 +1,69 @@
+================================================================================
+2b - Application Creation: import the application & test it
+================================================================================
+
+Shell   : python3  (Python 3.14.5, Windows)
+Module  : emotion_detection.py  ->  emotion_detector()
+Test in : "I love this new technology."
+
+--------------------------------------------------------------------------------
+ENVIRONMENT NOTE (please read)
+--------------------------------------------------------------------------------
+emotion_detector() calls the Watson NLP EmotionPredict endpoint:
+
+    https://sn-watson-emotion.labs.skills.network/v1/watson.runtime.nlp.v1/NlpService/EmotionPredict
+
+That host is only reachable from INSIDE the IBM Skills Network lab
+(Cloud IDE) environment. From a local machine it is firewalled, so the
+HTTPS connection times out and the live call cannot return the emotion
+JSON here.
+
+What this LOCAL transcript proves:
+  * import emotion_detection                          -> SUCCESS (no error)
+  * from emotion_detection import emotion_detector    -> SUCCESS (no error)
+  * emotion_detector("I love this new technology.")   -> raises
+        requests.exceptions.ConnectTimeout
+    because the lab-only endpoint is unreachable from this network.
+
+To capture the official PASSING transcript, run the same three lines in
+the IBM Skills Network terminal, where the call returns the emotion
+prediction JSON, e.g.:
+
+    >>> from emotion_detection import emotion_detector
+    >>> emotion_detector("I love this new technology.")
+    '{"emotionPredictions":[{"emotion":{"anger":...,"joy":...}, ...}], ...}'
+
+--------------------------------------------------------------------------------
+INTERACTIVE PYTHON SHELL SESSION (verbatim local capture)
+--------------------------------------------------------------------------------
+$ python3
+Python 3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import emotion_detection
+>>> from emotion_detection import emotion_detector
+>>> emotion_detector("I love this new technology.")
+Traceback (most recent call last):
+  File "...\urllib3\connection.py", line 204, in _new_conn
+    sock = connection.create_connection(...)
+  File "...\urllib3\util\connection.py", line 73, in create_connection
+    sock.connect(sa)
+TimeoutError: [WinError 10060] A connection attempt failed because the connected
+party did not properly respond after a period of time, or established connection
+failed because connected host has failed to respond
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ConnectTimeoutError: (<HTTPSConnection(host='sn-watson-emotion.labs.skills.network', port=443)>,
+    'Connection to sn-watson-emotion.labs.skills.network timed out. (connect timeout=None)')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    emotion_detector("I love this new technology.")
+  File "C:\Users\Kone\final_project\emotion_detection.py", line 14, in emotion_detector
+    response = requests.post(url, json=input_json, headers=headers)
+requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='sn-watson-emotion.labs.skills.network', port=443):
+    Max retries exceeded with url: /v1/watson.runtime.nlp.v1/NlpService/EmotionPredict
+    (Caused by ConnectTimeoutError(... 'Connection to sn-watson-emotion.labs.skills.network timed out.'))
+>>>
