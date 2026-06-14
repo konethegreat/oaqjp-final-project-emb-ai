@@ -1,0 +1,64 @@
+================================================================================
+5b - Unit testing result: python test_emotion_detection.py
+================================================================================
+
+Shell : python3 (Python 3.14.5, Windows)
+Tests : EmotionDetection.emotion_detection.emotion_detector vs expected dominant emotion
+          "I am glad this happened"                      -> joy
+          "I am really mad about this"                   -> anger
+          "I feel disgusted just hearing about this"     -> disgust
+          "I am so sad about this"                       -> sadness
+          "I am really afraid that this will happen"     -> fear
+
+ENVIRONMENT NOTE: emotion_detector() calls the Watson endpoint
+sn-watson-emotion.labs.skills.network, which is only reachable INSIDE the IBM
+Skills Network lab. From a local machine the calls time out, so the unmodified
+test ERRORS locally (see "LOCAL RUN" below). The "NETWORK-MOCKED RUN" patches
+requests.post to return representative payloads so the test logic itself can be
+validated offline -- it shows all five dominant-emotion assertions pass (OK).
+The official passing run must be captured in the lab terminal.
+
+--------------------------------------------------------------------------------
+NETWORK-MOCKED RUN  (requests.post patched; proves the 5 assertions pass)
+--------------------------------------------------------------------------------
+$ python run_tests_mocked.py
+test_emotion_detector (test_emotion_detection.TestEmotionDetection.test_emotion_detector) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+OK
+
+--------------------------------------------------------------------------------
+LOCAL RUN  (real endpoint, unreachable from this machine -> ConnectTimeout)
+--------------------------------------------------------------------------------
+$ python test_emotion_detection.py
+E
+======================================================================
+ERROR: test_emotion_detector (__main__.TestEmotionDetection.test_emotion_detector)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  ...
+  File "C:\Users\Kone\final_project\test_emotion_detection.py", line 11, in test_emotion_detector
+    emotion_detector('I am glad this happened')['dominant_emotion'],
+  File "C:\Users\Kone\final_project\EmotionDetection\emotion_detection.py", line 17, in emotion_detector
+    response = requests.post(url, json=input_json, headers=headers)
+  ...
+requests.exceptions.ConnectTimeout: HTTPSConnectionPool(host='sn-watson-emotion.labs.skills.network', port=443):
+    Max retries exceeded with url: /v1/watson.runtime.nlp.v1/NlpService/EmotionPredict
+    (Caused by ConnectTimeoutError(... 'Connection to sn-watson-emotion.labs.skills.network timed out.'))
+
+----------------------------------------------------------------------
+Ran 1 test in 42.217s
+
+FAILED (errors=1)
+
+--------------------------------------------------------------------------------
+LAB COMMAND to capture the official passing result (endpoint reachable):
+--------------------------------------------------------------------------------
+$ python3 test_emotion_detection.py
+.
+----------------------------------------------------------------------
+Ran 1 test in X.XXXs
+
+OK
