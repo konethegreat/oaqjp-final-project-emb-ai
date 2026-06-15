@@ -4,12 +4,23 @@ Serves the front-end page and exposes the ``/emotionDetector`` route, which runs
 the ``emotion_detector`` function on the supplied text and returns a
 human-readable summary of the detected emotions and the dominant emotion.
 """
+import os
+
 import requests
 from flask import Flask, render_template, request
 
 from EmotionDetection.emotion_detection import emotion_detector
 
-app = Flask("Emotion Detector")
+# Resolve templates/ and static/ relative to THIS file rather than the current
+# working directory, so the app serves correctly no matter where it is launched
+# from (e.g. the IBM Skills Network lab launching from a parent directory).
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(
+    "Emotion Detector",
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static"),
+)
 
 
 @app.route("/emotionDetector")
